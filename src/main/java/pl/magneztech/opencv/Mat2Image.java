@@ -3,6 +3,8 @@ package pl.magneztech.opencv;
 import org.opencv.core.*;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.objdetect.CascadeClassifier;
+import org.opencv.video.BackgroundSubtractorKNN;
+import org.opencv.video.Video;
 
 import java.awt.image.BufferedImage;
 
@@ -14,8 +16,10 @@ public class Mat2Image {
     Mat mat = new Mat();
     BufferedImage img;
     byte[] dat;
+    BackgroundSubtractorKNN backgroundSubtractor;
 
     public Mat2Image() {
+        backgroundSubtractor = Video.createBackgroundSubtractorKNN();
     }
 
     public Mat2Image(Mat mat) {
@@ -34,16 +38,21 @@ public class Mat2Image {
     }
 
     BufferedImage getImage(Mat mat) {
+        Mat fgMask = new Mat();
+        backgroundSubtractor.apply(mat, fgMask);
+        Mat output = new Mat();
+        mat.copyTo(output, fgMask);
+
         CascadeClassifier faceDetector = new CascadeClassifier("etc/haarcascades/palm.xml");
         MatOfRect faceDetections = new MatOfRect();
-        faceDetector.detectMultiScale(mat, faceDetections);
+        faceDetector.detectMultiScale(output, faceDetections);
         for (Rect rect : faceDetections.toArray()) {
-            Imgproc.rectangle(mat, new Point(rect.x, rect.y), new Point(rect.x + rect.width, rect.y + rect.height), new Scalar(0, 255, 0));
+            Imgproc.rectangle(output, new Point(rect.x, rect.y), new Point(rect.x + rect.width, rect.y + rect.height), new Scalar(0, 255, 0));
         }
-        getSpace(mat);
-        mat.get(0, 0, dat);
+        getSpace(output);
+        output.get(0, 0, dat);
         img.getRaster().setDataElements(0, 0,
-                mat.cols(), mat.rows(), dat);
+                output.cols(), output.rows(), dat);
         return img;
     }
 }
