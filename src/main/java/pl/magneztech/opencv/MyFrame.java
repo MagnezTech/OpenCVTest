@@ -18,7 +18,6 @@ public class MyFrame extends JFrame {
         contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
         setContentPane(contentPane);
         contentPane.setLayout(null);
-
         new MyThread().start();
     }
 
@@ -29,7 +28,13 @@ public class MyFrame extends JFrame {
         EventQueue.invokeLater(new Runnable() {
             public void run() {
                 try {
-                    MyFrame frame = new MyFrame();
+                    final MyFrame frame = new MyFrame();
+                    frame.addWindowListener(new java.awt.event.WindowAdapter() {
+                        @Override
+                        public void windowClosing(java.awt.event.WindowEvent windowEvent) {
+                            frame.close();
+                        }
+                    });
                     frame.setVisible(true);
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -41,6 +46,10 @@ public class MyFrame extends JFrame {
     public void paint(Graphics g) {
         g = contentPane.getGraphics();
         g.drawImage(videoCap.getOneFrame(), 0, 0, this);
+    }
+
+    public void close() {
+        videoCap.close();
     }
 
     class MyThread extends Thread {

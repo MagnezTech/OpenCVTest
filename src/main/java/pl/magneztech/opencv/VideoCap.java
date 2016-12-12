@@ -22,4 +22,8 @@ public class VideoCap {
         cap.read(mat2Img.mat);
         return mat2Img.getImage(mat2Img.mat);
     }
+
+    public void close() {
+        cap.release();
+    }
 }
