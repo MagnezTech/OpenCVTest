@@ -43,7 +43,7 @@ public class Mat2Image {
         Mat output = new Mat();
         mat.copyTo(output, fgMask);
 
-        CascadeClassifier faceDetector = new CascadeClassifier("etc/haarcascades/palm.xml");
+        CascadeClassifier faceDetector = new CascadeClassifier("etc/haarcascades/hand.cascade.xml");
         MatOfRect faceDetections = new MatOfRect();
         faceDetector.detectMultiScale(output, faceDetections);
         for (Rect rect : faceDetections.toArray()) {
