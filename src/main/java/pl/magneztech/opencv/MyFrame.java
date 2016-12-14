@@ -58,7 +58,7 @@ public class MyFrame extends JFrame {
             for (; ; ) {
                 repaint();
                 try {
-                    Thread.sleep(30);
+                    Thread.sleep(60);
                 } catch (InterruptedException e) {
                 }
             }
