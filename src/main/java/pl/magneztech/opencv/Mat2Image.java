@@ -58,9 +58,7 @@ public class Mat2Image {
         Mat withoutBackground = new Mat();
         Mat grayImage = new Mat();
         Mat cannyImage = new Mat();
-        Mat inRangeImage = new Mat();
         Mat result = new Mat();
-        Mat fgMask = new Mat();
 //        backgroundSubtractor.apply(originalImage, fgMask, 1);
 //        originalImage.copyTo(withoutBackground, fgMask);
         originalImage.copyTo(withoutBackground);
@@ -68,10 +66,23 @@ public class Mat2Image {
         Imgproc.Canny(grayImage, cannyImage, 100, 200);
         List<MatOfPoint> matOfPoints = new ArrayList<MatOfPoint>();
         Mat hierarchy = new Mat();
-        Core.inRange(cannyImage, new Scalar(0, 0, 0), new Scalar(0, 0, 0), inRangeImage);
-        Imgproc.findContours(cannyImage, matOfPoints, hierarchy, Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_SIMPLE);
-        result = Mat.zeros(cannyImage.rows(), cannyImage.cols(), CvType.CV_8UC1);
-//        Imgproc.drawContours(result, matOfPoints, -1, Scalar.all(255), Core.FILLED);
+        Core.inRange(cannyImage, new Scalar(0, 0, 0), new Scalar(0, 0, 0), result);
+        Imgproc.findContours(cannyImage, matOfPoints, hierarchy, Imgproc.RETR_EXTERNAL, Imgproc.CHAIN_APPROX_TC89_KCOS);
+
+        List<Rect> rects = new ArrayList<Rect>();
+        for (MatOfPoint matOfPoint : matOfPoints) {
+            MatOfPoint2f thisContour2f = new MatOfPoint2f();
+            MatOfPoint approxContour = new MatOfPoint();
+            MatOfPoint2f approxContour2f = new MatOfPoint2f();
+            new MatOfPoint2f(matOfPoint).convertTo(thisContour2f, CvType.CV_32FC2);
+            Imgproc.approxPolyDP(thisContour2f, approxContour2f, 2, true);
+            approxContour2f.convertTo(approxContour, CvType.CV_32S);
+            if (approxContour.size().height == 4) {
+                rects.add(Imgproc.boundingRect(approxContour));
+            }
+        }
+
+
 //        CascadeClassifier detector = new CascadeClassifier("etc/haarcascades/hand_cascade.xml");
 //        MatOfRect faceDetections = new MatOfRect();
 //        detector.detectMultiScale(result, faceDetections);
@@ -80,9 +91,10 @@ public class Mat2Image {
 //            Imgproc.rectangle(result, new Point(rect.x, rect.y), new Point(rect.x + rect.width, rect.y + rect.height), new Scalar(0, 255, 0));
 //            handCenter = new Point(rect.x + rect.width, rect.y + rect.height / 2);
 //        }
+
         getSpace(originalImage);
         originalImage.get(0, 0, dat);
-        return matToBufferedImage(cannyImage);
+        return matToBufferedImage(result);
     }
 
 }
